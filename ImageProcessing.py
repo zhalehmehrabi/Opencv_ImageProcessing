@@ -2,9 +2,28 @@ import cv2 as cv
 import numpy as np
 import time
 
-img = cv.imread('p.jpg', -1)
+img = cv.imread('khodam.jpg', -1)
 rows, cols, channel = img.shape
-print(rows)
+
+
+
+
+baseCascadePath = "D:\Programming language\opencv\opencv\sources\data\haarcascades"
+
+faceCascadeFilePath = baseCascadePath + "haarcascade_frontalface_default.xml"
+noseCascadeFilePath = baseCascadePath + "haarcascade_mcs_nose.xml"
+
+faceCascade = cv.CascadeClassifier(faceCascadeFilePath)
+noseCascade = cv.CascadeClassifier(noseCascadeFilePath)
+
+faceCascade.load("D:\Programming language\opencv\opencv\sources\data\haarcascades\haarcascade_frontalface_default.xml")
+noseCascade.load("D:\Programming language\opencv\opencv\sources\data\haarcascades\haarcascade_mcs_nose.xml")
+
+
+
+
+
+
 # 1
 cv.imshow('image', img)
 
@@ -70,18 +89,27 @@ if k == ord('8'):  # mn ba gaussian zdm ta behtar maloom she
 
 # 9
 if k == ord('9'):
-    face_cascade = cv.CascadeClassifier('haarcascade_frontalface_default.xml')
-    eye_cascade = cv.CascadeClassifier('haarcascade_eye.xml')
-    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-    faces = face_cascade.detectMultiScale(gray, 1, 5)
-    for (x, y, w, h) in faces:
-        cv.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
-        roi_gray = gray[y:y + h, x:x + w]
-        roi_color = img[y:y + h, x:x + w]
-        eyes = eye_cascade.detectMultiScale(roi_gray)
-        for (ex, ey, ew, eh) in eyes:
-            cv.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 2)
-    cv.imshow('img', img)
+    cap = cv.VideoCapture(0)
+
+    while 1:
+        ret, frame = cap.read()
+        gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+
+        faces = faceCascade.detectMultiScale(
+            gray,
+            scaleFactor=1.1,
+            minNeighbors=5,
+            minSize=(30, 30),
+            flags=cv.CASCADE_SCALE_IMAGE
+        )
+        for (x, y, w, h) in faces:
+            face = cv.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+        cv.imshow('frame', frame)
+        k = cv.waitKey(30) & 0xff
+        if k == 27:
+            break
+    cap.release()
+    cv.destroyAllWindows()
 # 10
 if k == ord('0'):
     i = 0
