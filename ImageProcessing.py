@@ -2,11 +2,10 @@ import cv2 as cv
 import numpy as np
 import time
 
-img = cv.imread('khodam.jpg', -1)
+img = cv.imread('6.jpg', -1)
 rows, cols, channel = img.shape
 
-
-
+img = img[:, :, 0:3]
 
 baseCascadePath = "D:\Programming language\opencv\opencv\sources\data\haarcascades"
 
@@ -31,8 +30,10 @@ k = cv.waitKey(0)
 
 # 2
 if k == ord('2'):
-    b, g, r = cv.split(img)
-    cv.imshow('blue', r)
+    #b, g, r = cv.split(img)
+    img[:, :, 1] = 0
+    img[:, :, 2] = 0
+    cv.imshow('blue', img)
     cv.waitKey(0)
 # 3
 if k == ord('3'):
@@ -70,12 +71,12 @@ if k == ord('8'):  # mn ba gaussian zdm ta behtar maloom she
     ret, thresh = cv.threshold(gray, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)
     # noise removal
     kernel = np.ones((3, 3), np.uint8)
-    opening = cv.morphologyEx(thresh, cv.MORPH_OPEN, kernel, iterations=3)
+    opening = cv.morphologyEx(thresh, cv.MORPH_OPEN, kernel, iterations=1)
     # sure background area
-    sure_bg = cv.dilate(opening, kernel, iterations=5)
+    sure_bg = cv.dilate(opening, kernel, iterations=3)
     # Finding sure foreground area
-    dist_transform = cv.distanceTransform(opening, cv.DIST_L2, 5)
-    ret, sure_fg = cv.threshold(dist_transform, 0.5 * dist_transform.max(), 255, 0)
+    dist_transform = cv.distanceTransform(opening, cv.DIST_L2, 3)
+    ret, sure_fg = cv.threshold(dist_transform, 0.1 * dist_transform.max(), 255, 0)
     sure_fg = np.uint8(sure_fg)
     unknown = cv.subtract(sure_bg, sure_fg)
     ret, markers = cv.connectedComponents(sure_fg)
@@ -89,11 +90,9 @@ if k == ord('8'):  # mn ba gaussian zdm ta behtar maloom she
 
 # 9
 if k == ord('9'):
-    cap = cv.VideoCapture(0)
 
     while 1:
-        ret, frame = cap.read()
-        gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+        gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
         faces = faceCascade.detectMultiScale(
             gray,
@@ -103,17 +102,16 @@ if k == ord('9'):
             flags=cv.CASCADE_SCALE_IMAGE
         )
         for (x, y, w, h) in faces:
-            face = cv.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
-        cv.imshow('frame', frame)
+            face = cv.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+        cv.imshow('frame', img)
         k = cv.waitKey(30) & 0xff
         if k == 27:
             break
-    cap.release()
     cv.destroyAllWindows()
 # 10
 if k == ord('0'):
     i = 0
-    cap = cv.VideoCapture('output.avi')
+    cap = cv.VideoCapture('8.mp4')
 
     while (cap.isOpened()):
         ret, frame = cap.read()
